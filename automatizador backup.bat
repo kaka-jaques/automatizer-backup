@@ -42,8 +42,6 @@ if %choice%==r (call net)
 if %choice%==L (call verify)
 if %choice%==l (call verify) else (goto erroInput)
 
-if ERRORLEVEL 1 CALL 
-
 if %back%==P (goto FunBackP)
 if %back%==p (goto FunBackP)
 if %back%==E (goto FunBackE)
@@ -275,7 +273,7 @@ start backupCopy.bat
 
 ::FUNÇÃO ERRO ADMINISTRATIVO
 :errorAdm
-msg * SEM PERMISSÃO ADMINISTRATIVO! /time:5
+msg * SEM PERMISSAO ADMINISTRATIVO! /time:5
 goto end
 
 ::ERRO DE INPUT
