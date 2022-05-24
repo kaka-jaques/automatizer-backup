@@ -195,7 +195,7 @@ goto disk
 ::SELEÇÃO DO SERVER PARA BACKUP
 :net
 echo =================================================================================================================
-echo //AVISO!! ANTES DE COMECAR, VERIFIQUE SE HA ALGUM COMPUTADOR NA REDE COM UMA PASTA COMPARTILHADA (BKP_Clientes)//
+echo //AVISO!! ANTES DE COMECAR, VERIFIQUE SE HA ALGUM COMPUTADOR NA REDE COM UMA PASTA COMPARTILHADA (BKP_Auto)//
 echo =================================================================================================================
 set /p host="DIGITE O NOME DO HOST MANUALMENTE (ID OU IP): "
 goto confirmation
