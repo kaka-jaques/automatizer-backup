@@ -1,5 +1,9 @@
 @echo off
 title AUTOMATIZER BACKUP 6.7
+net session >nul
+if %ERRORLEVEL% == 0 (goto genesis) else (goto errorAdm)
+
+:genesis
 echo ===================================================================================================
 echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -22,11 +26,7 @@ echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 echo ===================================================================================================
 
-net session >nul 2>&1
-if %ERRORLEVEL% == 0(goto errorAdm)
-
 ::SELEÇÃO DE REDE OU LOCAL
-:genesis
 echo ===================================================================
 set /p choice="DIGITE L PARA FAZER O BACKUP NO HOST LOCAL OU DIGITE R PARA REDE:(L/R) "
 
@@ -37,17 +37,10 @@ echo PADRAO................(DESKTOP, IMAGENS, DOCUMENTOS, DOWNLOADS, VIDEOS)
 echo ESPECIFICO............(PODE SELECIONAR O DIRETORIO DESDE A RAIZ ATE QUALQUER DIRETORIO)
 echo PADRAO + ESPECIFICO...(SERA USADO O METODO PADRAO E TAMBEM SELECIONARA MAIS DIRETORIOS OU ARQUIVOS A SEREM COPIADOS)
 set /p back="DESEJA FAZER BACKUP PADRAO, ESPECIFICO OU PADRAO + ESPECIFICA?(P/E/F) "
-if %choice%==R (call net)
-if %choice%==r (call net)  
-if %choice%==L (call verify)
-if %choice%==l (call verify) else (goto erroInput)
-
-if %back%==P (goto FunBackP)
-if %back%==p (goto FunBackP)
-if %back%==E (goto FunBackE)
-if %back%==e (goto FunBackE)
-if %back%==F (goto FunBackF)
-if %back%==f (goto FunBackF)
+if %choice%==R (goto net)
+if %choice%==r (goto net)  
+if %choice%==L (goto verify)
+if %choice%==l (goto verify) else (goto erroInput)
 
 ::FUNÇÃO DE DEFINIÇÃO DO BACKUP PADRÃO
 :FunBackP
@@ -59,8 +52,9 @@ echo>>backupCopy.bat xcopy %systemdrive%\users\%username%\images\*.* %host%\BKP_
 echo>>backupCopy.bat xcopy %systemdrive%\users\%username%\videos\*.* %host%\BKP_%username%\Videos /e /h /c /i
 echo>>backupCopy.bat xcopy %systemdrive%\Users\%username%\AppData\Local\Google\Chrome\User Data\Default\Bookmarks %host%\BKP_%username%\Google /e /h /c /i
 echo>>backupCopy.bat xcopy %systemdrive%\users\%username%\AppData\Local\Mozilla\Firefox\Profiles\*.* %host%\BKP_%username%\Firefox /e /h /c /i
-echo>>backupCopy.bat msg * CÓPIA DOS ARQUIVOS FINALIZADO! /time:30
+echo>>backupCopy.bat msg * /time:30 CÓPIA DOS ARQUIVOS FINALIZADO! 
 echo>>backupCopy.bat PAUSE
+goto start
 
 ::FUNÇÃO DE DEFINIÇÃO DO BACKUP ESPECIFICA
 :FunBackE
@@ -94,12 +88,9 @@ cd %dire%
 dir
 goto try
 :cho
-echo>>backupCopy.bat msg * CÓPIA DOS ARQUIVOS FINALIZADO! /time:30
+echo>>backupCopy.bat msg * /time:30 CÓPIA DOS ARQUIVOS FINALIZADO!
 echo>>backupCopy.bat PAUSE
-if %choice%==R (goto net)
-if %choice%==r (goto net)  
-if %choice%==L (goto verify)
-if %choice%==l (goto verify)
+goto start
 
 ::FUNÇÃO DE DEFINIÇÃO DO BACKUP PADRÃO + ESPECIFICA
 :FunBackF
@@ -141,10 +132,7 @@ goto try2
 :cho2
 echo>>backupCopy.bat msg * CÓPIA DOS ARQUIVOS FINALIZADO! /time:30
 echo>>backupCopy.bat PAUSE
-if %choice%==R (goto net)
-if %choice%==r (goto net)  
-if %choice%==L (goto verify)
-if %choice%==l (goto verify)
+goto start
 
 ::VERIFICAÇÃO DE ESPAÇO NO DISCO INTERNO
 :verify
@@ -155,13 +143,13 @@ if usado LSS livre (goto process) else (goto captcha)
 ::ERRO ORDINÁRIO DE ESPAÇO
 :captcha
 echo ===================================================================================================
-set /p ask="ESPACO INSFUCIENTE PARA BACKUP! QUER CONTINUAR OU SELECIONAR OUTRO DISCO? (Continuar/Sair/Disco): "
+set /p ask="ESPACO TALVEZ SEJA INSFUCIENTE PARA BACKUP! QUER CONTINUAR OU SELECIONAR OUTRO DISCO? (C - CONTINUAR/S - SAIR/D - DISCO): "
 if %ask%==c (goto process)
 if %ask%==C (goto process)
 if %ask%==s (goto end)
 if %ask%==S (goto end)
 if %ask%==d (goto select)
-if %ask%==D (goto select)
+if %ask%==D (goto select) else (goto erroInput)
 
 ::EXIBE LISTA DE DISCOS DISPONÍVEIS NO PC
 :select
@@ -174,11 +162,11 @@ diskpart -s list.txt
 echo ==================================================
 set /p host="SELECIONE UM DISCO COM MAIS ESPACO: "
 echo ==================================================
-set /p ask="QUER PARTICIONAR O DISCO SELECIONADO?(sim/nao): "
+set /p ask="QUER PARTICIONAR O DISCO SELECIONADO?(S - Sim/N - Nao): "
 if %ask%==S (goto process2)
 if %ask%==s (goto process2)
 if %ask%==n (goto conHostLocal)
-if %ask%==N (goto conHostLocal)
+if %ask%==N (goto conHostLocal) else (goto erroInputSel)
 
 ::PROCESSO DE BACKUP PRINCIPAL
 :process
@@ -209,11 +197,8 @@ goto disk
 echo =================================================================================================================
 echo //AVISO!! ANTES DE COMECAR, VERIFIQUE SE HA ALGUM COMPUTADOR NA REDE COM UMA PASTA COMPARTILHADA (BKP_Clientes)//
 echo =================================================================================================================
-set /p host="SELECIONE O HOST DESTINÁTARIO (SHOWTEC: CPU - 1/KALIL - 2) OU DIGITE O NOME DO HOST MANUALMENTE (ID OU IP): "
-if %host%==2 (goto filterHost)
-if %host%==1 (goto filterHost)
-if not %host%==1 (goto confirmation)
-if not %host%==2 (goto confirmation)
+set /p host="DIGITE O NOME DO HOST MANUALMENTE (ID OU IP): "
+goto confirmation
 
 ::CRIAR PARTIÇÃO PARA BACKUP
 :disk
@@ -224,23 +209,13 @@ G:
 format g: /fs:ntfs /q
 goto createFH
 
-::DEFINE IP PREDEFINIDO
-:filterHost
-if %host%==1 (set host=\\cpu\Backup_Clientes) else (set host=\\%host%\BKP_Clientes)
-if %host%==2 (set host=\\kalil\BKP_Clientes) else (set host=\\%host%\BKP_Clientes)
-set /p conf="%host% IP/ID destino esta correto?(sim/nao): "
-if %conf%==s (goto createFH)
-if %conf%==S (goto createFH)
-if %conf%==n (goto net)
-if %conf%==N (goto net)
-
 ::CONFIRMAÇÃO DE IP 
 :confirmation
-set /p conf="%host% IP/ID destino esta correto?(sim/nao): "
+set /p conf="IP/ID (%host%) destino esta correto?(S - Sim/N - Nao): "
 if %conf%==s (goto conHostIP)
 if %conf%==S (goto conHostIP)
 if %conf%==n (goto net)
-if %conf%==N (goto net)
+if %conf%==N (goto net) else (erroInputConf)
 
 ::CONVERSOR DO IP
 :conHostIP
@@ -269,17 +244,31 @@ if %back%==F (goto FunBackF)
 if %back%==f (goto FunBackF)
 
 ::PROCESSO DE CÓPIA DOS ARQUIVOS
+:start
 start backupCopy.bat
 
 ::FUNÇÃO ERRO ADMINISTRATIVO
 :errorAdm
-msg * SEM PERMISSAO ADMINISTRATIVO! /time:5
+msg * /time:5 INICIE O PROGRAMA COM PERMISSÃO DE ADMINISTRATIVO! 
 goto end
 
 ::ERRO DE INPUT
 :erroInput
-msg * OPÇÃO INVALIDA! /time:3
+msg * /time:3 OPCAO INVALIDA!
+cls
 goto genesis
+
+::ERRO DE INPUT NA CONFIRMAÇÃO DE IP
+:erroInputConf
+msg * /time:3 OPCAO INVALIDA!
+cls
+goto confirmation
+
+::ERRO DE INPUT NA SELEÇÃO DE PARTICIONAMENTO
+:erroInputSel
+msg * /time:3 OPCAO INVALIDA!
+cls
+goto select
 
 ::FIM DO PROGRAMA
 :end
