@@ -1,5 +1,5 @@
 @echo off
-title AUTOMATIZER BACKUP 6.7
+title AUTOMATIZER BACKUP 6.8
 net session >nul
 if %ERRORLEVEL% == 0 (goto genesis) else (goto errorAdm)
 

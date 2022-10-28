@@ -1,5 +1,7 @@
 # **_Automatizer Windows Backup_**
 
+###### <img src="https://wakatime.com/badge/github/kaka-jaques/automatizer-backup.svg"> count started 23/05/2022
+
 #### * A batchfile to backup _Windows Files_  before format PC or Servers too (future release: script to backup Windows Server files automatically in a specific day time)
 
 ---
